@@ -1,48 +1,51 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import pino from 'pino-http';
-
 dotenv.config();
+
+import logger from './middleware/logger.js';
+import notFoundHandler from './middleware/notFoundHandler.js';
+import errorHandler from './middleware/errorHandler.js';
+import connectMongoDB from './db/connectMongoDB.js';
+import notesRoutes from './routes/notesRoutes.js';
+
+const PORT = process.env.PORT || 3000;
+const MONGO_URL = process.env.MONGO_URL;
+
+if (!MONGO_URL) {
+  console.error('MONGO_URL is not defined in environment variables');
+  process.exit(1);
+}
 
 const app = express();
 
-//  Middleware
-app.use(cors());
+// Middleware
+app.use(logger);
 app.use(express.json());
-app.use(pino());
+app.use(cors());
 
-// Маршрути
+// Routes
+app.use('/notes', notesRoutes);
 
-// GET /notes
-app.get('/notes', (req, res) => {
-  res.status(200).json({ message: 'Retrieved all notes' });
-});
+// 404 handler
+app.use(notFoundHandler);
 
-// GET /notes/:noteId
-app.get('/notes/:noteId', (req, res) => {
-  const { noteId } = req.params;
-  res.status(200).json({ message: `Retrieved note with ID: ${noteId}` });
-});
+// Error handler
+app.use(errorHandler);
 
-// Middleware 404
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
+// Connect to DB & start server
+const start = async () => {
+  try {
+    await connectMongoDB(MONGO_URL);
+    app.listen(PORT, () => {
+      console.log(`Server running. Use our API on port: ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+};
 
-// Middleware 500
-app.use((err, req, res, next) => {
-  console.error(err.message);
-  res.status(500).json({ message: err.message });
-});
+start();
 
-// GET /test-error
-app.get('/test-error', () => {
-  throw new Error('Simulated server error');
-});
-
-// Запуск сервера
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+export default app;
