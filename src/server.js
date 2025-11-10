@@ -5,7 +5,8 @@ dotenv.config();
 
 import logger from './middleware/logger.js';
 import notFoundHandler from './middleware/notFoundHandler.js';
-import errorHandler from './middleware/errorHandler.js';
+import { errorHandler } from './middleware/errorHandler.js';
+
 import connectMongoDB from './db/connectMongoDB.js';
 import notesRoutes from './routes/notesRoutes.js';
 
@@ -25,7 +26,7 @@ app.use(express.json());
 app.use(cors());
 
 // Routes
-app.use('/notes', notesRoutes);
+app.use(notesRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
