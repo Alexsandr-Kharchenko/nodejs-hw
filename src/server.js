@@ -20,47 +20,27 @@ if (!MONGO_URL) {
 }
 
 const app = express();
-const PORT = process.env.PORT;
 
+// ✅ Використовуємо логер
+app.use(pinoHttp({ logger }));
+
+// ✅ Підключаємо безпеку і парсинг
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
-app.use(pinoHttp());
 
-// Маршрут для отримання всіх нотаток
-app.get('/notes', (req, res) => {
-  res.status(200).json({ message: 'Retrieved all notes' });
-});
+// ✅ Підключаємо маршрути
+app.use('/notes', notesRoutes);
 
-// Маршрут для отримання нотатки за id
-app.get('/notes/:noteId', (req, res) => {
-  const { noteId } = req.params;
-  res.status(200).json({ message: `Retrieved note with ID: ${noteId}` });
-});
+// ✅ Обробка 404
+app.use(notFoundHandler);
 
-// Тестовий маршрут для імітації помилки
-app.get('/test-error', () => {
-  throw new Error('Simulated server error');
-});
+// ✅ Обробка помилок
+app.use(errorHandler);
 
-// Middleware для обробки неіснуючих маршрутів (404)
-app.use((req, res) => {
-  res.status(404).json({ message: 'Route not found' });
-});
-
-// Middleware для обробки помилок (500)
-
-app.use((err, req, res, next) => {
-  console.error(err);
-
-  if (process.env.NODE_ENV === 'production') {
-    res.status(500).json({ message: 'Oops! Something went wrong' });
-  } else {
-    res.status(500).json({ message: err.message, stack: err.stack });
-  }
-});
-
-// Запуск сервера
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// ✅ Підключаємо до бази
+connectMongoDB(MONGO_URL).then(() => {
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+  });
 });
