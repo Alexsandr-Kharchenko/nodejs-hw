@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-dotenv.config();
+import pinoHttp from 'pino-http';
+import 'dotenv/config';
+import helmet from 'helmet';
 
 import logger from './middleware/logger.js';
 import notFoundHandler from './middleware/notFoundHandler.js';
@@ -19,34 +20,47 @@ if (!MONGO_URL) {
 }
 
 const app = express();
+const PORT = process.env.PORT;
 
-// Middleware
-app.use(logger);
-app.use(express.json());
 app.use(cors());
+app.use(helmet());
+app.use(express.json());
+app.use(pinoHttp());
 
-// Routes
-app.use(notesRoutes);
+// Маршрут для отримання всіх нотаток
+app.get('/notes', (req, res) => {
+  res.status(200).json({ message: 'Retrieved all notes' });
+});
 
-// 404 handler
-app.use(notFoundHandler);
+// Маршрут для отримання нотатки за id
+app.get('/notes/:noteId', (req, res) => {
+  const { noteId } = req.params;
+  res.status(200).json({ message: `Retrieved note with ID: ${noteId}` });
+});
 
-// Error handler
-app.use(errorHandler);
+// Тестовий маршрут для імітації помилки
+app.get('/test-error', () => {
+  throw new Error('Simulated server error');
+});
 
-// Connect to DB & start servers
-const start = async () => {
-  try {
-    await connectMongoDB(MONGO_URL);
-    app.listen(PORT, () => {
-      console.log(`Server running. Use our API on port: ${PORT}`);
-    });
-  } catch (err) {
-    console.error('Failed to start server:', err);
-    process.exit(1);
+// Middleware для обробки неіснуючих маршрутів (404)
+app.use((req, res) => {
+  res.status(404).json({ message: 'Route not found' });
+});
+
+// Middleware для обробки помилок (500)
+
+app.use((err, req, res, next) => {
+  console.error(err);
+
+  if (process.env.NODE_ENV === 'production') {
+    res.status(500).json({ message: 'Oops! Something went wrong' });
+  } else {
+    res.status(500).json({ message: err.message, stack: err.stack });
   }
-};
+});
 
-start();
-
-export default app;
+// Запуск сервера
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
