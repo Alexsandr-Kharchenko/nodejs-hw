@@ -19,7 +19,6 @@
     "url": "https://github.com/Alexsandr-Kharchenko/nodejs-hw/issues"
   },
   "homepage": "https://github.com/Alexsandr-Kharchenko/nodejs-hw#readme",
-  "description": "",
   "devDependencies": {
     "@eslint/js": "^9.38.0",
     "eslint": "^9.38.0",
