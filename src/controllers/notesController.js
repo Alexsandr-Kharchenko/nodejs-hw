@@ -11,7 +11,7 @@ export const getAllNotes = async (req, res, next) => {
   }
 };
 
-// GET /notes/:noteId
+// GET /:noteId
 export const getNoteById = async (req, res, next) => {
   try {
     const { noteId } = req.params;
@@ -23,23 +23,31 @@ export const getNoteById = async (req, res, next) => {
   }
 };
 
-// POST /notes
+// POST /
 export const createNote = async (req, res, next) => {
   try {
-    const newNote = await Note.create(req.body);
+    const { title, content, tag } = req.body;
+    if (!title?.trim()) throw createHttpError(400, 'Title is required');
+
+    const newNote = await Note.create({ title, content, tag });
     res.status(201).json(newNote);
   } catch (err) {
     next(err);
   }
 };
 
-// PATCH /notes/:noteId
+// PATCH /:noteId
 export const updateNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-    const updatedNote = await Note.findByIdAndUpdate(noteId, req.body, {
-      new: true,
-    });
+    const { title, content, tag } = req.body;
+
+    const updatedNote = await Note.findByIdAndUpdate(
+      noteId,
+      { title, content, tag },
+      { new: true, runValidators: true },
+    );
+
     if (!updatedNote) throw createHttpError(404, 'Note not found');
     res.status(200).json(updatedNote);
   } catch (err) {
@@ -47,7 +55,7 @@ export const updateNote = async (req, res, next) => {
   }
 };
 
-// DELETE /notes/:noteId
+// DELETE /:noteId
 export const deleteNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
