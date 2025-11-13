@@ -34,7 +34,7 @@ app.use(notFoundHandler);
 // Error handler
 app.use(errorHandler);
 
-// Connect to DB & start server
+// Connect to DB & start servers
 const start = async () => {
   try {
     await connectMongoDB(MONGO_URL);
