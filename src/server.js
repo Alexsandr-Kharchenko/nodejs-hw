@@ -13,33 +13,26 @@ import notesRoutes from './routes/notesRoutes.js';
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
 
-if (!MONGO_URL) {
-  console.error('❌ MONGO_URL is not defined in environment variables');
-  process.exit(1);
-}
-
-// 🔹 Спочатку створюємо app
 const app = express();
 
-// 🔹 Тепер підключаємо middleware
 app.use(pinoHttp());
 app.use(cors());
 app.use(helmet());
 app.use(express.json());
 
-// 🔹 Маршрути
+// Маршрути
 app.use('/', notesRoutes);
 
-// 🔹 Celebrate validation errors
+// Celebrate validation errors
 app.use(celebrateErrors());
 
-// 🔹 404
+// 404
 app.use(notFoundHandler);
 
-// 🔹 Глобальний обробник помилок
+// Глобальний обробник помилок
 app.use(errorHandler);
 
-// 🔹 Підключення до MongoDB і запуск сервера
+// Підключення до MongoDB і запуск сервера
 connectMongoDB(MONGO_URL)
   .then(() => {
     app.listen(PORT, () => {

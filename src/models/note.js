@@ -1,26 +1,16 @@
 import mongoose from 'mongoose';
-
-const validTags = [
-  'Work',
-  'Personal',
-  'Meeting',
-  'Shopping',
-  'Ideas',
-  'Travel',
-  'Finance',
-  'Health',
-  'Important',
-  'Todo',
-];
+import { TAGS } from '../constants/tags.js';
 
 const noteSchema = new mongoose.Schema(
   {
     title: { type: String, required: true, trim: true },
     content: { type: String, trim: true, default: '' },
-    tag: { type: String, enum: validTags, default: 'Todo' },
+    tag: { type: String, enum: TAGS, default: 'Todo' },
   },
   { timestamps: true },
 );
+
+noteSchema.index({ title: 'text', content: 'text' }); // ← текстовий індекс
 
 const Note = mongoose.model('Note', noteSchema);
 

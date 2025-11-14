@@ -7,9 +7,11 @@ export const getAllNotesSchema = {
   [Segments.QUERY]: Joi.object({
     page: Joi.number().integer().min(1).default(1),
     perPage: Joi.number().integer().min(5).max(20).default(10),
-    tag: Joi.string().valid(...TAGS),
-    search: Joi.string().allow(''),
-  }),
+    tag: Joi.string()
+      .valid(...TAGS)
+      .optional(),
+    search: Joi.string().allow('').optional(),
+  }).unknown(true),
 };
 
 // Custom ObjectId validator
@@ -20,7 +22,7 @@ const objectIdValidator = (value, helpers) => {
   return value;
 };
 
-// noteId schema (for params)
+// GET /notes/:noteId & DELETE /notes/:noteId
 export const noteIdSchema = {
   [Segments.PARAMS]: Joi.object({
     noteId: Joi.string()
@@ -29,7 +31,7 @@ export const noteIdSchema = {
   }),
 };
 
-// POST /notes body schema
+// POST /notes
 export const createNoteSchema = {
   [Segments.BODY]: Joi.object({
     title: Joi.string().min(1).required(),
@@ -40,7 +42,7 @@ export const createNoteSchema = {
   }),
 };
 
-// PATCH /notes/:noteId -> both params and body in one schema
+// PATCH /notes/:noteId
 export const updateNoteSchema = {
   [Segments.PARAMS]: Joi.object({
     noteId: Joi.string()

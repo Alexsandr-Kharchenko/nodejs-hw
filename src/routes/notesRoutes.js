@@ -1,4 +1,3 @@
-// src/routes/notesRoutes.js
 import { Router } from 'express';
 import { celebrate } from 'celebrate';
 import {
@@ -18,10 +17,19 @@ import {
 
 const router = Router();
 
+// GET /notes → пагінація + фільтри + пошук
 router.get('/notes', celebrate(getAllNotesSchema), getAllNotes);
+
+// GET /notes/:noteId
 router.get('/notes/:noteId', celebrate(noteIdSchema), getNoteById);
+
+// POST /notes
 router.post('/notes', celebrate(createNoteSchema), createNote);
+
+// PATCH /notes/:noteId
 router.patch('/notes/:noteId', celebrate(updateNoteSchema), updateNote);
+
+// DELETE /notes/:noteId
 router.delete('/notes/:noteId', celebrate(noteIdSchema), deleteNote);
 
 export default router;
