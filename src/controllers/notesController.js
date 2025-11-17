@@ -1,5 +1,7 @@
 import Note from '../models/note.js';
+import createError from 'http-errors';
 
+// GET /notes
 export const getAllNotes = async (req, res, next) => {
   try {
     const { page = 1, perPage = 10, tag, search } = req.query;
@@ -18,15 +20,16 @@ export const getAllNotes = async (req, res, next) => {
 
     const skip = (page - 1) * perPage;
 
-    // Загальна кількість нотаток по фільтру
-    const totalNotes = await Note.countDocuments(query);
-    const totalPages = Math.ceil(totalNotes / perPage);
+    // Паралельні запити замість послідовних
+    const [totalNotes, notes] = await Promise.all([
+      Note.countDocuments(query),
+      Note.find(query)
+        .skip(skip)
+        .limit(Number(perPage))
+        .sort({ createdAt: -1 }),
+    ]);
 
-    // Вибірка нотаток
-    const notes = await Note.find(query)
-      .skip(skip)
-      .limit(Number(perPage))
-      .sort({ createdAt: -1 });
+    const totalPages = Math.ceil(totalNotes / perPage);
 
     res.status(200).json({
       page: Number(page),
@@ -45,7 +48,11 @@ export const getNoteById = async (req, res, next) => {
   try {
     const { noteId } = req.params;
     const note = await Note.findById(noteId);
-    if (!note) return res.status(404).json({ message: 'Note not found' });
+
+    if (!note) {
+      return next(createError(404, 'Note not found'));
+    }
+
     res.status(200).json(note);
   } catch (err) {
     next(err);
@@ -75,8 +82,10 @@ export const updateNote = async (req, res, next) => {
       { new: true, runValidators: true },
     );
 
-    if (!updatedNote)
-      return res.status(404).json({ message: 'Note not found' });
+    if (!updatedNote) {
+      return next(createError(404, 'Note not found'));
+    }
+
     res.status(200).json(updatedNote);
   } catch (err) {
     next(err);
@@ -88,8 +97,11 @@ export const deleteNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
     const deletedNote = await Note.findByIdAndDelete(noteId);
-    if (!deletedNote)
-      return res.status(404).json({ message: 'Note not found' });
+
+    if (!deletedNote) {
+      return next(createError(404, 'Note not found'));
+    }
+
     res.status(200).json(deletedNote);
   } catch (err) {
     next(err);
