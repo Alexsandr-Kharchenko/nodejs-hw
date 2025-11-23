@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import { errors as celebrateErrors } from 'celebrate';
 
@@ -9,6 +10,7 @@ import notFoundHandler from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import connectMongoDB from './db/connectMongoDB.js';
 import notesRoutes from './routes/notesRoutes.js';
+import authRoutes from './routes/authRoutes.js';
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
@@ -16,12 +18,16 @@ const MONGO_URL = process.env.MONGO_URL;
 const app = express();
 
 app.use(pinoHttp());
-app.use(cors());
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' })); // дозвіл cookie
 app.use(helmet());
 app.use(express.json());
+app.use(cookieParser());
 
-// Маршрути
-app.use('/', notesRoutes);
+// Публічні маршрути для реєстрації/логіну
+app.use('/auth', authRoutes);
+
+// Приватні маршрути для нотаток
+app.use('/notes', notesRoutes);
 
 // Celebrate validation errors
 app.use(celebrateErrors());

@@ -8,6 +8,7 @@ import {
   deleteNote,
 } from '../controllers/notesController.js';
 
+import authenticate from '../middleware/authenticate.js';
 import {
   getAllNotesSchema,
   noteIdSchema,
@@ -17,19 +18,22 @@ import {
 
 const router = Router();
 
-// GET /notes → пагінація + фільтри + пошук
-router.get('/notes', celebrate(getAllNotesSchema), getAllNotes);
+// застосуємо authenticate до всіх роутів в цьому роутері
+router.use(authenticate);
 
-// GET /notes/:noteId
-router.get('/notes/:noteId', celebrate(noteIdSchema), getNoteById);
+// GET / → список нотаток користувача
+router.get('/', celebrate(getAllNotesSchema), getAllNotes);
 
-// POST /notes
-router.post('/notes', celebrate(createNoteSchema), createNote);
+// GET /:noteId → конкретна нотатка
+router.get('/:noteId', celebrate(noteIdSchema), getNoteById);
 
-// PATCH /notes/:noteId
-router.patch('/notes/:noteId', celebrate(updateNoteSchema), updateNote);
+// POST / → створити нотатку
+router.post('/', celebrate(createNoteSchema), createNote);
 
-// DELETE /notes/:noteId
-router.delete('/notes/:noteId', celebrate(noteIdSchema), deleteNote);
+// PATCH /:noteId → редагувати нотатку
+router.patch('/:noteId', celebrate(updateNoteSchema), updateNote);
+
+// DELETE /:noteId → видалити нотатку
+router.delete('/:noteId', celebrate(noteIdSchema), deleteNote);
 
 export default router;
