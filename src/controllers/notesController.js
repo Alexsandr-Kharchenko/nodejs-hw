@@ -1,26 +1,29 @@
-import Note from '../models/note.js';
+// src/controllers/notesController.js
 import createError from 'http-errors';
+import Note from '../models/note.js';
 
 // GET /notes
 export const getAllNotes = async (req, res, next) => {
   try {
-    const { page = 1, perPage = 10, tag, search } = req.query;
-
-    const query = {};
-
-    // Фільтр за тегом
-    if (tag) {
-      query.tag = tag;
+    const userId = req.user && req.user._id;
+    if (!userId) {
+      return next(createError(401, 'Unauthorized'));
     }
 
-    // Текстовий пошук
+    const { page = 1, perPage = 10, tag, search } = req.query;
+
+    const query = { userId };
+
+    if (tag) {
+      query.tags = tag;
+    }
+
     if (search) {
       query.$text = { $search: search };
     }
 
-    const skip = (page - 1) * perPage;
+    const skip = (Number(page) - 1) * Number(perPage);
 
-    // Паралельні запити замість послідовних
     const [totalNotes, notes] = await Promise.all([
       Note.countDocuments(query),
       Note.find(query)
@@ -29,7 +32,7 @@ export const getAllNotes = async (req, res, next) => {
         .sort({ createdAt: -1 }),
     ]);
 
-    const totalPages = Math.ceil(totalNotes / perPage);
+    const totalPages = Math.ceil(totalNotes / Number(perPage) || 1);
 
     res.status(200).json({
       page: Number(page),
@@ -47,7 +50,9 @@ export const getAllNotes = async (req, res, next) => {
 export const getNoteById = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-    const note = await Note.findById(noteId);
+    const userId = req.user && req.user._id;
+
+    const note = await Note.findOne({ _id: noteId, userId });
 
     if (!note) {
       return next(createError(404, 'Note not found'));
@@ -62,8 +67,13 @@ export const getNoteById = async (req, res, next) => {
 // POST /notes
 export const createNote = async (req, res, next) => {
   try {
-    const { title, content, tag } = req.body;
-    const newNote = await Note.create({ title, content, tag });
+    const userId = req.user && req.user._id;
+    if (!userId) {
+      return next(createError(401, 'Unauthorized'));
+    }
+
+    const { title, content, tags } = req.body;
+    const newNote = await Note.create({ title, content, tags, userId });
     res.status(201).json(newNote);
   } catch (err) {
     next(err);
@@ -74,11 +84,12 @@ export const createNote = async (req, res, next) => {
 export const updateNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-    const { title, content, tag } = req.body;
+    const userId = req.user && req.user._id;
+    const { title, content, tags } = req.body;
 
-    const updatedNote = await Note.findByIdAndUpdate(
-      noteId,
-      { title, content, tag },
+    const updatedNote = await Note.findOneAndUpdate(
+      { _id: noteId, userId },
+      { title, content, tags },
       { new: true, runValidators: true },
     );
 
@@ -96,13 +107,15 @@ export const updateNote = async (req, res, next) => {
 export const deleteNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
-    const deletedNote = await Note.findByIdAndDelete(noteId);
+    const userId = req.user && req.user._id;
+
+    const deletedNote = await Note.findOneAndDelete({ _id: noteId, userId });
 
     if (!deletedNote) {
       return next(createError(404, 'Note not found'));
     }
 
-    res.status(200).json(deletedNote);
+    res.status(204).send();
   } catch (err) {
     next(err);
   }
