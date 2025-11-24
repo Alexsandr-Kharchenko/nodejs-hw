@@ -21,19 +21,19 @@ const router = Router();
 // застосуємо authenticate до всіх роутів в цьому роутері
 router.use(authenticate);
 
-// GET / → список нотаток користувача
+// GET / список нотаток користувача
 router.get('/', celebrate(getAllNotesSchema), getAllNotes);
 
-// GET /:noteId → конкретна нотатка
+// GET /:noteId конкретна нотатка
 router.get('/:noteId', celebrate(noteIdSchema), getNoteById);
 
-// POST / → створити нотатку
+// POST / створити нотатку
 router.post('/', celebrate(createNoteSchema), createNote);
 
-// PATCH /:noteId → редагувати нотатку
+// PATCH /:noteId редагувати нотатку
 router.patch('/:noteId', celebrate(updateNoteSchema), updateNote);
 
-// DELETE /:noteId → видалити нотатку
+// DELETE /:noteId видалити нотатку
 router.delete('/:noteId', celebrate(noteIdSchema), deleteNote);
 
 export default router;
