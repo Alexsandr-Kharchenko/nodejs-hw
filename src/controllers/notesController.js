@@ -1,6 +1,5 @@
-// src/controllers/notesController.js
 import createError from 'http-errors';
-import Note from '../models/note.js';
+import { Note } from '../models/note.js';
 
 // GET /notes
 export const getAllNotes = async (req, res, next) => {
@@ -15,7 +14,7 @@ export const getAllNotes = async (req, res, next) => {
     const query = { userId };
 
     if (tag) {
-      query.tags = tag;
+      query.tag = tag;
     }
 
     if (search) {
@@ -32,7 +31,7 @@ export const getAllNotes = async (req, res, next) => {
         .sort({ createdAt: -1 }),
     ]);
 
-    const totalPages = Math.ceil(totalNotes / Number(perPage) || 1);
+    const totalPages = Math.ceil(totalNotes / Number(perPage)) || 1;
 
     res.status(200).json({
       page: Number(page),
@@ -68,12 +67,20 @@ export const getNoteById = async (req, res, next) => {
 export const createNote = async (req, res, next) => {
   try {
     const userId = req.user && req.user._id;
+
     if (!userId) {
       return next(createError(401, 'Unauthorized'));
     }
 
-    const { title, content, tags } = req.body;
-    const newNote = await Note.create({ title, content, tags, userId });
+    const { title, content, tag } = req.body;
+
+    const newNote = await Note.create({
+      title,
+      content,
+      tag,
+      userId,
+    });
+
     res.status(201).json(newNote);
   } catch (err) {
     next(err);
@@ -85,11 +92,11 @@ export const updateNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
     const userId = req.user && req.user._id;
-    const { title, content, tags } = req.body;
+    const { title, content, tag } = req.body;
 
     const updatedNote = await Note.findOneAndUpdate(
       { _id: noteId, userId },
-      { title, content, tags },
+      { title, content, tag },
       { new: true, runValidators: true },
     );
 
@@ -109,13 +116,16 @@ export const deleteNote = async (req, res, next) => {
     const { noteId } = req.params;
     const userId = req.user && req.user._id;
 
-    const deletedNote = await Note.findOneAndDelete({ _id: noteId, userId });
+    const deletedNote = await Note.findOneAndDelete({
+      _id: noteId,
+      userId,
+    });
 
     if (!deletedNote) {
       return next(createError(404, 'Note not found'));
     }
 
-    res.status(204).send();
+    res.status(200).json(deletedNote);
   } catch (err) {
     next(err);
   }

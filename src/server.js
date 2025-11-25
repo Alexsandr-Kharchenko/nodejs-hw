@@ -1,14 +1,14 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import pinoHttp from 'pino-http';
 import cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import { errors as celebrateErrors } from 'celebrate';
 
-import notFoundHandler from './middleware/notFoundHandler.js';
+import logger from './middleware/logger.js';
+import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
-import connectMongoDB from './db/connectMongoDB.js';
+import { connectMongoDB } from './db/connectMongoDB.js';
 import notesRoutes from './routes/notesRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 
@@ -17,28 +17,27 @@ const MONGO_URL = process.env.MONGO_URL;
 
 const app = express();
 
-app.use(pinoHttp());
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' })); // дозвіл cookie
+// Логування (через кастомний middleware)
+app.use(logger);
+
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
 
-// Публічні маршрути для реєстрації/логіну
-app.use('/auth', authRoutes);
+// Маршрути (без префіксів!)
+app.use(authRoutes);
+app.use(notesRoutes);
 
-// Приватні маршрути для нотаток
-app.use('/notes', notesRoutes);
-
-// Celebrate validation errors
+// Celebrate errors
 app.use(celebrateErrors());
 
-// 404
+// 404 handler
 app.use(notFoundHandler);
 
-// Глобальний обробник помилок
+// Глобальний error handler
 app.use(errorHandler);
 
-// Підключення до MongoDB і запуск сервера
 connectMongoDB(MONGO_URL)
   .then(() => {
     app.listen(PORT, () => {

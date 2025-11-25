@@ -13,4 +13,4 @@ const sessionSchema = new Schema(
   { timestamps: true },
 );
 
-export default model('Session', sessionSchema);
+export const Session = model('Session', sessionSchema);
