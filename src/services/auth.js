@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import Session from '../models/session.js';
+import { Session } from '../models/session.js';
 import { FIFTEEN_MINUTES, ONE_DAY } from '../constants/time.js';
 
 export async function createSession(userId) {
@@ -23,20 +23,28 @@ export async function createSession(userId) {
 export function setSessionCookies(res, session) {
   const cookieOptionsAccess = {
     httpOnly: true,
-    secure: false,
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
     maxAge: FIFTEEN_MINUTES,
   };
 
   const cookieOptionsRefresh = {
     httpOnly: true,
-    secure: false,
-    sameSite: 'lax',
+    secure: true,
+    sameSite: 'none',
+    maxAge: ONE_DAY,
+  };
+
+  // Окрема опція для sessionId (той самий термін життя, але окремий об'єкт)
+  const cookieOptionsSession = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
     maxAge: ONE_DAY,
   };
 
   // Встановлюємо cookie
   res.cookie('accessToken', session.accessToken, cookieOptionsAccess);
   res.cookie('refreshToken', session.refreshToken, cookieOptionsRefresh);
-  res.cookie('sessionId', session._id.toString(), cookieOptionsRefresh);
+  res.cookie('sessionId', session._id.toString(), cookieOptionsSession);
 }
