@@ -13,9 +13,9 @@ import {
 
 const router = express.Router();
 
-router.post('/register', celebrate(registerUserSchema), registerUser);
-router.post('/login', celebrate(loginUserSchema), loginUser);
-router.post('/refresh', refreshUserSession); // cookies used
-router.post('/logout', logoutUser); // cookies used
+router.post('/auth/register', celebrate(registerUserSchema), registerUser);
+router.post('/auth/login', celebrate(loginUserSchema), loginUser);
+router.post('/auth/refresh', refreshUserSession); // cookies used
+router.post('/auth/logout', logoutUser); // cookies used
 
 export default router;
