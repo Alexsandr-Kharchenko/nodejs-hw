@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { celebrate } from 'celebrate';
+
 import {
   getAllNotes,
   getNoteById,
@@ -19,22 +20,34 @@ import {
 
 const router = Router();
 
-// застосуємо authenticate до всіх роутів в цьому роутері
-router.use(authenticate);
+// GET /notes - отримати всі нотатки (автентифікація потрібна)
+router.get('/notes', authenticate, celebrate(getAllNotesSchema), getAllNotes);
 
-// GET / список нотаток користувача
-router.get('/', celebrate(getAllNotesSchema), getAllNotes);
+// GET /notes/:noteId - отримати конкретну нотатку
+router.get(
+  '/notes/:noteId',
+  authenticate,
+  celebrate(noteIdSchema),
+  getNoteById,
+);
 
-// GET /:noteId конкретна нотатка
-router.get('/:noteId', celebrate(noteIdSchema), getNoteById);
+// POST /notes - створити нотатку
+router.post('/notes', authenticate, celebrate(createNoteSchema), createNote);
 
-// POST / створити нотатку
-router.post('/', celebrate(createNoteSchema), createNote);
+// PATCH /notes/:noteId - оновити нотатку
+router.patch(
+  '/notes/:noteId',
+  authenticate,
+  celebrate(updateNoteSchema),
+  updateNote,
+);
 
-// PATCH /:noteId редагувати нотатку
-router.patch('/:noteId', celebrate(updateNoteSchema), updateNote);
-
-// DELETE /:noteId видалити нотатку
-router.delete('/:noteId', celebrate(noteIdSchema), deleteNote);
+// DELETE /notes/:noteId - видалити нотатку
+router.delete(
+  '/notes/:noteId',
+  authenticate,
+  celebrate(noteIdSchema),
+  deleteNote,
+);
 
 export default router;
