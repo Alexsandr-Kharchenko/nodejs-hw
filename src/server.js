@@ -9,33 +9,46 @@ import logger from './middleware/logger.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { connectMongoDB } from './db/connectMongoDB.js';
+
+import { authRoutes } from './routes/authRoutes.js';
 import notesRoutes from './routes/notesRoutes.js';
-import authRoutes from './routes/authRoutes.js';
+import { userRoutes } from './routes/userRoutes.js';
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URL = process.env.MONGO_URL;
 
 const app = express();
 
-// Логування (через кастомний middleware)
 app.use(logger);
 
-app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.FRONTEND_URL,
+  }),
+);
+
 app.use(helmet());
-app.use(express.json());
 app.use(cookieParser());
 
-// Маршрути (без префіксів!)
-app.use(authRoutes);
-app.use(notesRoutes);
+// Парсер JSON і form-data
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+/* -----------------------
+   МАРШРУТИ
+----------------------- */
+app.use('/auth', authRoutes);
+app.use('/notes', notesRoutes);
+app.use('/users', userRoutes);
 
 // Celebrate errors
 app.use(celebrateErrors());
 
-// 404 handler
+// 404
 app.use(notFoundHandler);
 
-// Глобальний error handler
+// Error handler
 app.use(errorHandler);
 
 connectMongoDB(MONGO_URL)
