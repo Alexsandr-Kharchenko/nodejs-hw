@@ -9,9 +9,8 @@ const router = express.Router();
 router.patch(
   '/me/avatar',
   authenticate,
-  uploadAvatarMiddleware.single('avatar'), // multer обробляє файли
+  uploadAvatarMiddleware.single('avatar'),
   updateUserAvatar,
 );
 
-// Іменований експорт маршруту
 export { router as userRoutes };

@@ -12,7 +12,7 @@ export const saveFileToCloudinary = async (filePath) => {
     folder: 'avatars',
   });
 
-  await fs.unlink(filePath); // видалити локальний файл
+  await fs.unlink(filePath);
 
   return result.secure_url;
 };

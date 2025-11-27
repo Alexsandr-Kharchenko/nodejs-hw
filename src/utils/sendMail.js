@@ -12,16 +12,13 @@ if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASSWORD || !SMTP_FROM) {
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: Number(SMTP_PORT),
-  secure: Number(SMTP_PORT) === 465, // true for 465, false for other ports
+  secure: Number(SMTP_PORT) === 465,
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASSWORD,
   },
 });
 
-/**
- * mailOptions: { to, subject, html, text (optional) }
- */
 export const sendEmail = async (mailOptions) => {
   const options = {
     from: SMTP_FROM,
