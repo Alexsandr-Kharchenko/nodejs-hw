@@ -55,5 +55,5 @@ export const updateNoteSchema = {
     tag: Joi.string()
       .valid(...TAGS)
       .optional(),
-  }).or('title', 'content', 'tag'), // хоча б одне поле повинно бути
+  }).or('title', 'content', 'tag'),
 };
