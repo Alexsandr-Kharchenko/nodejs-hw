@@ -1,5 +1,5 @@
 import pinoHttp from 'pino-http';
 
-const logger = pinoHttp();
-
-export default logger;
+export const logger = pinoHttp({
+  prettyPrint: process.env.NODE_ENV !== 'production',
+});
