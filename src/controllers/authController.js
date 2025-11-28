@@ -1,13 +1,13 @@
 import createHttpError from 'http-errors';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import fs from 'fs/promises';
+import handlebars from 'handlebars';
 
 import { User } from '../models/user.js';
 import { Session } from '../models/session.js';
-
 import { createSession, setSessionCookies } from '../services/auth.js';
 import { sendEmail } from '../utils/sendMail.js';
-import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 // ------------------- РЕЄСТРАЦІЯ -------------------
 export const registerUser = async (req, res, next) => {
@@ -22,7 +22,7 @@ export const registerUser = async (req, res, next) => {
     const user = await User.create({
       email,
       password: hashed,
-      username: email, // дублюється pre("save")
+      username: email,
     });
 
     const session = await createSession(user._id);
@@ -66,6 +66,7 @@ export const refreshUserSession = async (req, res, next) => {
     }
 
     const session = await Session.findById(sessionId);
+
     if (!session || session.refreshToken !== refreshToken) {
       throw createHttpError(401, 'Session not found');
     }
@@ -104,14 +105,13 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
-// ------------------- RESET EMAIL -------------------
+// ------------------- REQUEST RESET EMAIL -------------------
 export const requestResetEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
 
     const user = await User.findOne({ email });
 
-    // Навіть якщо юзера нема, відповідаємо успішно
     if (!user) {
       return res.json({ message: 'Password reset email sent successfully' });
     }
@@ -124,12 +124,23 @@ export const requestResetEmail = async (req, res, next) => {
 
     const resetLink = `${process.env.FRONTEND_DOMAIN}/reset-password?token=${token}`;
 
+    // Load template
+    const templatePath = new URL(
+      '../templates/reset-password-email.html',
+      import.meta.url,
+    );
+    const templateContent = await fs.readFile(templatePath, 'utf-8');
+    const compileTemplate = handlebars.compile(templateContent);
+
+    const html = compileTemplate({
+      username: user.username,
+      resetLink,
+    });
+
     await sendEmail({
       to: user.email,
       subject: 'Reset your password',
-      html: `<p>Hello ${user.username},</p>
-             <p>Click the link to reset your password:</p>
-             <a href="${resetLink}">${resetLink}</a>`,
+      html,
     });
 
     res.json({ message: 'Password reset email sent successfully' });
@@ -150,37 +161,17 @@ export const resetPassword = async (req, res, next) => {
       throw createHttpError(401, 'Invalid or expired token');
     }
 
-    const user = await User.findById(payload.sub);
-    if (!user) throw createHttpError(404, 'User not found');
+    const user = await User.findOne({ _id: payload.sub, email: payload.email });
+
+    if (!user) {
+      throw createHttpError(404, 'User not found');
+    }
 
     const hashed = await bcrypt.hash(password, 10);
     user.password = hashed;
     await user.save();
 
     res.json({ message: 'Password reset successfully' });
-  } catch (err) {
-    next(err);
-  }
-};
-
-// ------------------- UPDATE AVATAR -------------------
-export const uploadAvatar = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      throw createHttpError(401, 'Not authenticated');
-    }
-
-    if (!req.file) {
-      throw createHttpError(400, 'No file');
-    }
-
-    const result = await saveFileToCloudinary(req.file.buffer);
-
-    req.user.avatar = result.secure_url;
-    await req.user.save();
-    console.log('FILE:', req.file);
-
-    res.status(200).json({ url: result.secure_url });
   } catch (err) {
     next(err);
   }

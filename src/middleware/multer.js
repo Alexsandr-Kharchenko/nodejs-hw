@@ -10,8 +10,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Іменований експорт
-export const uploadAvatarMiddleware = multer({
+export const upload = multer({
   storage,
   fileFilter,
   limits: { fileSize: 2 * 1024 * 1024 },
