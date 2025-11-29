@@ -18,32 +18,33 @@ const MONGO_URL = process.env.MONGO_URL;
 
 const app = express();
 
-// Middleware
+// ===== Middleware =====
 app.use(logger);
 app.use(cors({ credentials: true, origin: process.env.FRONTEND_DOMAIN }));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Роутери з префіксом
-app.use('/auth', authRoutes);
-app.use('/notes', notesRoutes);
-app.use('/users', userRoutes);
+app.use(authRoutes);
+app.use(notesRoutes);
+app.use(userRoutes);
 
-// Celebrate errors
+// Celebrate validation errors
 app.use(celebrateErrors());
 
-// 404
+// 404 handler
 app.use(notFoundHandler);
 
-// Error handler
+// Global error handler
 app.use(errorHandler);
 
-// Підключення до MongoDB та запуск сервера
+// ===== MongoDB connection + server start =====
 connectMongoDB(MONGO_URL)
-  .then(() =>
-    app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`)),
-  )
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  })
   .catch((err) => {
     console.error('❌ Failed to connect to MongoDB:', err.message);
     process.exit(1);

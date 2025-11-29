@@ -29,6 +29,7 @@ export const requestResetEmailSchema = {
 // Скидання пароля
 export const resetPasswordSchema = {
   [Segments.BODY]: Joi.object({
+    token: Joi.string().required(),
     password: passwordValidation,
   }),
 };
