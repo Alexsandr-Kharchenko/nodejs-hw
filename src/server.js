@@ -25,10 +25,9 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ===== Routes WITHOUT prefixes (вимога ментора) =====
-app.use(authRoutes); // шляхи визначені всередині authRoutes
-app.use(notesRoutes); // шляхи визначені всередині notesRoutes
-app.use(userRoutes); // шляхи визначені всередині userRoutes
+app.use(authRoutes);
+app.use(notesRoutes);
+app.use(userRoutes);
 
 // Celebrate validation errors
 app.use(celebrateErrors());
