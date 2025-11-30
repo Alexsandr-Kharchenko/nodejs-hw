@@ -23,7 +23,6 @@ app.use(logger);
 app.use(cors({ credentials: true, origin: process.env.FRONTEND_DOMAIN }));
 app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.use(authRoutes);
 app.use(notesRoutes);
@@ -38,7 +37,7 @@ app.use(notFoundHandler);
 // Global error handler
 app.use(errorHandler);
 
-// ===== MongoDB connection + server start =====
+// ===== MongoDB connection
 connectMongoDB(MONGO_URL)
   .then(() => {
     app.listen(PORT, () => {
