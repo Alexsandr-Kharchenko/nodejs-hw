@@ -5,9 +5,8 @@ import { authenticate } from '../middleware/authenticate.js';
 
 const router = express.Router();
 
-// PATCH /users/me/avatar
 router.patch(
-  '/me/avatar',
+  '/users/me/avatar',
   authenticate,
   upload.single('avatar'),
   updateUserAvatar,
