@@ -9,7 +9,6 @@ import { Session } from '../models/session.js';
 import { createSession, setSessionCookies } from '../services/auth.js';
 import { sendEmail } from '../utils/sendMail.js';
 
-// ------------------- РЕЄСТРАЦІЯ -------------------
 export const registerUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -34,7 +33,6 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
-// ------------------- ЛОГІН -------------------
 export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -56,7 +54,6 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
-// ------------------- REFRESH -------------------
 export const refreshUserSession = async (req, res, next) => {
   try {
     const { sessionId, refreshToken } = req.cookies;
@@ -86,7 +83,6 @@ export const refreshUserSession = async (req, res, next) => {
   }
 };
 
-// ------------------- LOGOUT -------------------
 export const logoutUser = async (req, res, next) => {
   try {
     const { sessionId } = req.cookies;
@@ -105,7 +101,6 @@ export const logoutUser = async (req, res, next) => {
   }
 };
 
-// ------------------- REQUEST RESET EMAIL -------------------
 export const requestResetEmail = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -124,7 +119,6 @@ export const requestResetEmail = async (req, res, next) => {
 
     const resetLink = `${process.env.FRONTEND_DOMAIN}/reset-password?token=${token}`;
 
-    // Load template
     const templatePath = new URL(
       '../templates/reset-password-email.html',
       import.meta.url,
@@ -149,7 +143,6 @@ export const requestResetEmail = async (req, res, next) => {
   }
 };
 
-// ------------------- RESET PASSWORD -------------------
 export const resetPassword = async (req, res, next) => {
   try {
     const { token, password } = req.body;

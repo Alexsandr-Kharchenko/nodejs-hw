@@ -20,10 +20,8 @@ import {
 
 const router = Router();
 
-// GET /notes - отримати всі нотатки (автентифікація потрібна)
 router.get('/notes', authenticate, celebrate(getAllNotesSchema), getAllNotes);
 
-// GET /notes/:noteId - отримати конкретну нотатку
 router.get(
   '/notes/:noteId',
   authenticate,
@@ -31,10 +29,8 @@ router.get(
   getNoteById,
 );
 
-// POST /notes - створити нотатку
 router.post('/notes', authenticate, celebrate(createNoteSchema), createNote);
 
-// PATCH /notes/:noteId - оновити нотатку
 router.patch(
   '/notes/:noteId',
   authenticate,
@@ -42,7 +38,6 @@ router.patch(
   updateNote,
 );
 
-// DELETE /notes/:noteId - видалити нотатку
 router.delete(
   '/notes/:noteId',
   authenticate,

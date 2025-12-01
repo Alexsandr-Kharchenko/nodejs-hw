@@ -17,7 +17,6 @@ import {
 
 const router = express.Router();
 
-// Тепер шляхи містять префікс /auth
 router.post('/auth/register', celebrate(registerUserSchema), registerUser);
 router.post('/auth/login', celebrate(loginUserSchema), loginUser);
 router.post('/auth/refresh', refreshUserSession);
