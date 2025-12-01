@@ -2,7 +2,6 @@ import { Joi, Segments } from 'celebrate';
 import { isValidObjectId } from 'mongoose';
 import { TAGS } from '../constants/tags.js';
 
-// GET /notes query schema
 export const getAllNotesSchema = {
   [Segments.QUERY]: Joi.object({
     page: Joi.number().integer().min(1).default(1),
@@ -14,7 +13,6 @@ export const getAllNotesSchema = {
   }).unknown(true),
 };
 
-// Custom ObjectId validator
 const objectIdValidator = (value, helpers) => {
   if (!isValidObjectId(value)) {
     return helpers.error('any.invalid');
@@ -22,7 +20,6 @@ const objectIdValidator = (value, helpers) => {
   return value;
 };
 
-// GET /notes/:noteId & DELETE /notes/:noteId
 export const noteIdSchema = {
   [Segments.PARAMS]: Joi.object({
     noteId: Joi.string()
@@ -31,7 +28,6 @@ export const noteIdSchema = {
   }),
 };
 
-// POST /notes
 export const createNoteSchema = {
   [Segments.BODY]: Joi.object({
     title: Joi.string().min(1).required(),
@@ -42,7 +38,6 @@ export const createNoteSchema = {
   }),
 };
 
-// PATCH /notes/:noteId
 export const updateNoteSchema = {
   [Segments.PARAMS]: Joi.object({
     noteId: Joi.string()

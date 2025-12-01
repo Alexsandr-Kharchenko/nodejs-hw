@@ -35,7 +35,6 @@ export function setSessionCookies(res, session) {
     maxAge: ONE_DAY,
   };
 
-  // Окрема опція для sessionId (той самий термін життя, але окремий об'єкт)
   const cookieOptionsSession = {
     httpOnly: true,
     secure: true,
@@ -43,7 +42,6 @@ export function setSessionCookies(res, session) {
     maxAge: ONE_DAY,
   };
 
-  // Встановлюємо cookie
   res.cookie('accessToken', session.accessToken, cookieOptionsAccess);
   res.cookie('refreshToken', session.refreshToken, cookieOptionsRefresh);
   res.cookie('sessionId', session._id.toString(), cookieOptionsSession);

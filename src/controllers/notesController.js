@@ -1,7 +1,6 @@
 import createError from 'http-errors';
 import { Note } from '../models/note.js';
 
-// GET /notes
 export const getAllNotes = async (req, res, next) => {
   try {
     const userId = req.user && req.user._id;
@@ -45,7 +44,6 @@ export const getAllNotes = async (req, res, next) => {
   }
 };
 
-// GET /notes/:noteId
 export const getNoteById = async (req, res, next) => {
   try {
     const { noteId } = req.params;
@@ -63,7 +61,6 @@ export const getNoteById = async (req, res, next) => {
   }
 };
 
-// POST /notes
 export const createNote = async (req, res, next) => {
   try {
     const userId = req.user && req.user._id;
@@ -87,7 +84,6 @@ export const createNote = async (req, res, next) => {
   }
 };
 
-// PATCH /notes/:noteId
 export const updateNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
@@ -110,7 +106,6 @@ export const updateNote = async (req, res, next) => {
   }
 };
 
-// DELETE /notes/:noteId
 export const deleteNote = async (req, res, next) => {
   try {
     const { noteId } = req.params;
